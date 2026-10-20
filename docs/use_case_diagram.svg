@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1150 990" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="1150" height="990" fill="#F6F8F7"/>
+  <text x="575" y="34" text-anchor="middle" font-size="22" font-weight="bold" fill="#0B4A40">Pharmacy Inventory Management System — Use Case Diagram</text>
+
+  <defs>
+    <style>
+      .boundary { fill: #FFFFFF; stroke: #0F6B5C; stroke-width: 1.5; }
+      .usecase { fill: #FFFFFF; stroke: #0F6B5C; stroke-width: 1.3; }
+      .usecase-admin { fill: #FFF7EA; stroke: #D4901F; stroke-width: 1.3; }
+      .uctext { font-size: 12px; fill: #1B2B28; text-anchor: middle; }
+      .actor-label { font-size: 14px; font-weight: bold; fill: #0B4A40; text-anchor: middle; }
+      .assoc { stroke: #9FB3AE; stroke-width: 1.1; fill: none; }
+      .section-title { font-size: 13px; font-weight: bold; fill: #6B7C77; text-anchor: middle; }
+      .title { font-size: 16px; font-weight: bold; fill: #0F6B5C; }
+    </style>
+  </defs>
+
+  <!-- System boundary -->
+  <rect class="boundary" x="220" y="65" width="820" height="800" rx="10"/>
+  <text x="630" y="92" text-anchor="middle" class="title">Pharmacy IMS</text>
+
+  <!-- Section labels -->
+  <text x="450" y="118" class="section-title">— Shared by Admin &amp; Staff —</text>
+  <text x="810" y="118" class="section-title">— Admin Only —</text>
+  <line x1="700" y1="105" x2="700" y2="845" stroke="#E1E8E5" stroke-width="1.5" stroke-dasharray="5,4"/>
+
+  <!-- ============ Shared use cases (left column, stacked) ============ -->
+  <ellipse class="usecase" cx="450" cy="160" rx="120" ry="27"/>
+  <text x="450" y="164" class="uctext">Login / Logout</text>
+
+  <ellipse class="usecase" cx="450" cy="230" rx="120" ry="27"/>
+  <text x="450" y="234" class="uctext">View Dashboard</text>
+
+  <ellipse class="usecase" cx="450" cy="300" rx="120" ry="27"/>
+  <text x="450" y="304" class="uctext">Stock In / Stock Out</text>
+
+  <ellipse class="usecase" cx="450" cy="370" rx="120" ry="27"/>
+  <text x="450" y="374" class="uctext">Box In / Box Out</text>
+
+  <ellipse class="usecase" cx="450" cy="440" rx="120" ry="27"/>
+  <text x="450" y="444" class="uctext">Record Sale</text>
+
+  <ellipse class="usecase" cx="450" cy="510" rx="130" ry="27"/>
+  <text x="450" y="514" class="uctext">Manage Debt Payments</text>
+
+  <ellipse class="usecase" cx="450" cy="580" rx="130" ry="27"/>
+  <text x="450" y="584" class="uctext">View / Generate Reports</text>
+
+  <ellipse class="usecase" cx="450" cy="650" rx="130" ry="27"/>
+  <text x="450" y="654" class="uctext">Search / Filter Records</text>
+
+  <ellipse class="usecase" cx="450" cy="720" rx="130" ry="27"/>
+  <text x="450" y="724" class="uctext">Manage Expenses</text>
+
+  <ellipse class="usecase" cx="450" cy="790" rx="110" ry="27"/>
+  <text x="450" y="794" class="uctext">Print Report</text>
+
+  <!-- ============ Admin-only use cases (right column, stacked) ============ -->
+  <ellipse class="usecase-admin" cx="810" cy="160" rx="120" ry="27"/>
+  <text x="810" y="164" class="uctext">Manage Products</text>
+
+  <ellipse class="usecase-admin" cx="810" cy="230" rx="120" ry="27"/>
+  <text x="810" y="234" class="uctext">Manage Boxes</text>
+
+  <ellipse class="usecase-admin" cx="810" cy="300" rx="120" ry="27"/>
+  <text x="810" y="304" class="uctext">Manage Users</text>
+
+  <ellipse class="usecase-admin" cx="810" cy="370" rx="120" ry="27"/>
+  <text x="810" y="374" class="uctext">Delete Records</text>
+
+  <!-- ============ Admin actor (top-left, outside boundary) ============ -->
+  <g transform="translate(60,150)">
+    <circle cx="40" cy="20" r="14" fill="none" stroke="#0F6B5C" stroke-width="1.6"/>
+    <line x1="40" y1="34" x2="40" y2="72" stroke="#0F6B5C" stroke-width="1.6"/>
+    <line x1="14" y1="50" x2="66" y2="50" stroke="#0F6B5C" stroke-width="1.6"/>
+    <line x1="40" y1="72" x2="18" y2="105" stroke="#0F6B5C" stroke-width="1.6"/>
+    <line x1="40" y1="72" x2="62" y2="105" stroke="#0F6B5C" stroke-width="1.6"/>
+    <text x="40" y="124" class="actor-label">Admin</text>
+  </g>
+
+  <!-- ============ Staff actor (bottom-left, outside boundary) ============ -->
+  <g transform="translate(60,560)">
+    <circle cx="40" cy="20" r="14" fill="none" stroke="#0F6B5C" stroke-width="1.6"/>
+    <line x1="40" y1="34" x2="40" y2="72" stroke="#0F6B5C" stroke-width="1.6"/>
+    <line x1="14" y1="50" x2="66" y2="50" stroke="#0F6B5C" stroke-width="1.6"/>
+    <line x1="40" y1="72" x2="18" y2="105" stroke="#0F6B5C" stroke-width="1.6"/>
+    <line x1="40" y1="72" x2="62" y2="105" stroke="#0F6B5C" stroke-width="1.6"/>
+    <text x="40" y="124" class="actor-label">Staff</text>
+  </g>
+
+  <!-- Admin: single line into shared block + single line into admin-only block -->
+  <path class="assoc" d="M140,190 C220,180 280,170 330,165"/>
+  <path class="assoc" d="M140,190 C400,140 650,150 690,165"/>
+
+  <!-- Staff: single line into shared block (entry point near middle of shared stack) -->
+  <path class="assoc" d="M140,620 C220,560 280,500 330,440"/>
+
+  <!-- Bracket connecting all shared ellipses to a single entry point for clarity -->
+  <path class="assoc" d="M330,165 L330,790" stroke-dasharray="2,3"/>
+
+  <!-- Legend -->
+  <rect x="260" y="870" width="160" height="26" rx="4" class="usecase"/>
+  <text x="340" y="887" class="uctext" font-size="11">Shared use case</text>
+  <rect x="450" y="870" width="160" height="26" rx="4" class="usecase-admin"/>
+  <text x="530" y="887" class="uctext" font-size="11">Admin-only use case</text>
+
+  <!-- Notes -->
+  <rect x="220" y="915" width="820" height="65" fill="#FFFFFF" stroke="#E1E8E5" rx="6"/>
+  <text x="630" y="935" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B2B28">Notes</text>
+  <text x="630" y="954" text-anchor="middle" font-size="11" fill="#6B7C77">Every Sale automatically reduces medicine stock. Every Stock/Box In or Out updates inventory totals.</text>
+  <text x="630" y="970" text-anchor="middle" font-size="11" fill="#6B7C77">Debt payments auto-update Payment Status (Unpaid → Partial → Paid) once Remaining Balance reaches zero. Expenses track operating costs by category.</text>
+</svg>

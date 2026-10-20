@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WISDOM Blended Classes — System Architecture Showcase</title>
+    <style>
+        /* ---------------------------------------------------------
+           1. DESIGN TOKENS (Hyphenated Canonical System)
+           --------------------------------------------------------- */
+        :root {
+            --navy-800: #0d2b45;
+            --navy-700: #1f5262;
+            --gold-600: #c9a227;
+            --gold-700: #8f6b0d;
+            --cream-50: #fdfbf6;
+            --paper: #fbf9f4;
+            --line: #e3e0d6;
+            --ink-700: #2a3544;
+            --ink-500: #5a6a7d;
+            --success: #176b3a;
+            --success-bg: #e9f8ef;
+            --error: #9d1c2b;
+            --error-bg: #fdeef0;
+            --shadow-1: 0 4px 12px rgba(6, 26, 44, 0.06);
+            --shadow-2: 0 12px 32px rgba(6, 26, 44, 0.12);
+            --radius: 12px;
+            --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            --font-display: Georgia, "Times New Roman", serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background-color: #f4f6f8;
+            color: var(--ink-700);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ---------------------------------------------------------
+           2. LAYOUT & NAVIGATION
+           --------------------------------------------------------- */
+        .sidebar {
+            width: 260px;
+            background: var(--navy-800);
+            color: var(--cream-50);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 8px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 24px;
+        }
+        .brand-logo {
+            width: 40px; height: 40px;
+            background: var(--cream-50);
+            border-radius: 50%;
+            display: grid; place-items: center;
+            color: var(--navy-800);
+            font-weight: 800;
+            font-family: var(--font-display);
+            box-shadow: 0 0 0 2px var(--gold-600);
+        }
+        .brand-text { font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0.1em; font-weight: 700; }
+        .brand-sub { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: #a9b7c8; }
+
+        .nav-group { margin-bottom: 24px; }
+        .nav-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; color: #7b8899; padding: 0 12px; margin-bottom: 8px; }
+
+        .nav-link {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px;
+            color: #cdd8e6;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.08); color: #fff; }
+        .nav-badge {
+            background: var(--error);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 32px 40px;
+            max-width: 1200px;
+        }
+
+        /* ---------------------------------------------------------
+           3. UI COMPONENTS
+           --------------------------------------------------------- */
+        .page-header { margin-bottom: 32px; }
+        .page-header h1 { font-family: var(--font-display); font-size: 1.8rem; color: var(--navy-800); margin-bottom: 4px; }
+        .page-header p { color: var(--ink-500); font-size: 0.95rem; }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-1);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-title { font-size: 1.1rem; font-weight: 700; color: var(--navy-800); }
+        .card-body { padding: 24px; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            gap: 8px;
+        }
+        .btn-gold { background: var(--gold-600); color: var(--navy-800); }
+        .btn-gold:hover { background: var(--gold-700); color: #fff; }
+        .btn-ghost { background: transparent; border-color: var(--line); color: var(--ink-700); }
+        .btn-ghost:hover { background: var(--cream-50); }
+        .btn-danger { background: var(--error); color: #fff; }
+        .btn-danger:hover { background: #7a1520; }
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+        .form-field { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--navy-700); }
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus { outline: none; border-color: var(--gold-600); box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15); }
+
+        /* Inline Validation States */
+        .form-input.is-valid { border-color: var(--success); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23176b3a' viewBox='0 0 16 16'%3E%3Cpath d='M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+        .form-input.is-invalid { border-color: var(--error); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239d1c2b' viewBox='0 0 16 16'%3E%3Cpath d='M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+        .form-hint { font-size: 0.8rem; color: var(--ink-500); margin-top: 4px; }
+        .form-error { font-size: 0.8rem; color: var(--error); margin-top: 4px; display: none; }
+        .form-input.is-invalid + .form-error { display: block; }
+
+        /* ---------------------------------------------------------
+           4. TABLES & SKELETONS
+           --------------------------------------------------------- */
+        .table-wrap { overflow-x: auto; }
+        .table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .table th { text-align: left; padding: 12px 16px; background: var(--cream-50); color: var(--navy-700); font-weight: 600; border-bottom: 2px solid var(--line); cursor: pointer; user-select: none; }
+        .table th:hover { color: var(--navy-800); }
+        .table td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+        .table tr:last-child td { border-bottom: none; }
+
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 4px; color: transparent !important; }
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ---------------------------------------------------------
+           5. SPECIALIZED COMPONENTS
+           --------------------------------------------------------- */
+        .flash-temp-password {
+            border-left: 5px solid var(--gold-600);
+            background: var(--paper);
+            padding: 20px;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            margin-bottom: 24px;
+        }
+        .flash-temp-password .eyebrow { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--navy-700); font-weight: 800; margin-bottom: 8px; }
+        .temp-code-box {
+            display: inline-flex; align-items: center; gap: 12px;
+            background: #fff;
+            border: 1px dashed var(--line);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-family: ui-monospace, monospace;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+            color: var(--navy-800);
+            margin: 12px 0;
+        }
+
+        .copy-btn {
+            background: var(--cream-50);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--navy-700);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: var(--gold-600); color: var(--navy-800); border-color: var(--gold-600); }
+        .copy-btn.copied { background: var(--success-bg); color: var(--success); border-color: var(--success); }
+
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(13, 43, 69, 0.6);
+            backdrop-filter: blur(4px);
+            display: none; place-items: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: grid; }
+        .modal-box {
+            background: #fff;
+            width: 100%; max-width: 440px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-2);
+            padding: 28px;
+            text-align: center;
+            animation: modal-pop 0.3s ease;
+        }
+        @keyframes modal-pop { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-title { font-family: var(--font-display); font-size: 1.3rem; color: var(--navy-800); margin-bottom: 8px; }
+        .modal-body { color: var(--ink-500); margin-bottom: 24px; font-size: 0.95rem; }
+
+        .tag { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .tag-pending { background: #fff3cd; color: #856404; }
+        .tag-approved { background: var(--success-bg); color: var(--success); }
+        .tag-auto-delete { background: #e3f2fd; color: #0d47a1; font-size: 0.7rem; margin-left: 8px; }
+
+        /* Utility to show/hide showcase sections */
+        .showcase-section { display: none; }
+        .showcase-section.active { display: block; animation: fade-in 0.4s ease; }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .role-switcher {
+            margin-top: auto;
+            padding: 16px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .role-switcher select {
+            width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2);
+            background: var(--navy-800); color: #fff; font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-logo">W</div>
+            <div>
+                <div class="brand-text">WISDOM</div>
+                <div class="brand-sub">Blended Classes</div>
+            </div>
+        </div>
+
+        <nav>
+            <div class="nav-group">
+                <div class="nav-label">Overview</div>
+                <a class="nav-link active" onclick="showSection('dashboard')">Dashboard</a>
+                <a class="nav-link" onclick="showSection('auth-flow')">Auth & Security Flow</a>
+            </div>
+
+            <div class="nav-group admin-only">
+                <div class="nav-label">Administration</div>
+                <a class="nav-link" onclick="showSection('reset-requests')">
+                    Reset Requests <span class="nav-badge">2</span>
+                </a>
+                <a class="nav-link" onclick="showSection('users')">User Management</a>
+                <a class="nav-link" onclick="showSection('payments')">Financials</a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-label">Support</div>
+                <a class="nav-link" onclick="showSection('contact')">Contact & WhatsApp</a>
+                <a class="nav-link" onclick="showSection('errors')">Error Pages Preview</a>
+            </div>
+        </nav>
+
+        <div class="role-switcher">
+            <div class="nav-label" style="margin-bottom: 8px;">View As</div>
+            <select id="roleSelect" onchange="toggleRole()">
+                <option value="admin">Administrator</option>
+                <option value="student">Student</option>
+            </select>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- SECTION: DASHBOARD -->
+        <div id="dashboard" class="showcase-section active">
+            <div class="page-header">
+                <h1>System Architecture Showcase</h1>
+                <p>Interactive prototype demonstrating all features from Deliveries 1–4. Use the sidebar to navigate.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div class="card">
+                    <div class="card-body">
+                        <div style="font-size: 0.8rem; color: var(--ink-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Security</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--navy-800);">AES-256 / Bcrypt</div>
+                        <div style="font-size: 0.85rem; color: var(--success); margin-top: 4px;">✓ Fisher-Yates Temp Passwords</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div style="font-size: 0.8rem; color: var(--ink-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Performance</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--navy-800);">30s Cache TTL</div>
+                        <div style="font-size: 0.85rem; color: var(--ink-500); margin-top: 4px;">Nav counters cached in session</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div style="font-size: 0.8rem; color: var(--ink-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">UX Pattern</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--navy-800);">Hyphenated CSS</div>
+                        <div style="font-size: 0.85rem; color: var(--ink-500); margin-top: 4px;">Option B canonical naming</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <div class="card-title">Quick Actions</div>
+                </div>
+                <div class="card-body" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-ghost" onclick="triggerSessionModal()">Simulate 25m Idle (Session Warning)</button>
+                    <button class="btn btn-ghost" onclick="showSection('errors')">Preview Branded 404 Page</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: AUTH & SECURITY FLOW -->
+        <div id="auth-flow" class="showcase-section">
+            <div class="page-header">
+                <h1>Authentication & Security</h1>
+                <p>Inline validation, force-reset routing, and rate-limiting UI patterns.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><div class="card-title">Set New Password (Force Reset Flow)</div></div>
+                <div class="card-body" style="max-width: 500px;">
+                    <p style="margin-bottom: 20px; color: var(--ink-500); font-size: 0.9rem;">
+                        Triggered when <code>force_password_reset = 1</code>. Redirects from any page until completed.
+                    </p>
+                    <form onsubmit="event.preventDefault(); alert('Password updated! Redirecting to dashboard...');">
+                        <div class="form-field">
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-input" id="newPw" minlength="8" placeholder="Min 8 characters" onblur="validateField(this)">
+                            <div class="form-hint">Must contain letters and numbers.</div>
+                            <div class="form-error">Password must be at least 8 characters.</div>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" class="form-input" id="confirmPw" minlength="8" placeholder="Re-enter password" onblur="validateMatch(this)">
+                            <div class="form-error">Passwords do not match.</div>
+                        </div>
+                        <button type="submit" class="btn btn-gold" style="width: 100%; margin-top: 8px;">Set New Password</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><div class="card-title">Forgot Password (Dual Path)</div></div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div>
+                            <h3 style="font-size: 1rem; margin-bottom: 8px;">Path A: Email Token</h3>
+                            <p style="font-size: 0.85rem; color: var(--ink-500); margin-bottom: 12px;">Rate limited: 3 requests / 15 min per account. Throttled endpoint: 5 / 5 min per IP.</p>
+                            <input type="email" class="form-input" placeholder="Registered email address">
+                            <button class="btn btn-gold btn-sm" style="margin-top: 8px;">Send Reset Link</button>
+                        </div>
+                        <div style="border-left: 1px solid var(--line); padding-left: 24px;">
+                            <h3 style="font-size: 1rem; margin-bottom: 8px;">Path B: Admin Approval</h3>
+                            <p style="font-size: 0.85rem; color: var(--ink-500); margin-bottom: 12px;">Creates a pending request. Admin generates secure temp password.</p>
+                            <button class="btn btn-ghost btn-sm" style="width: 100%; border-color: #25D366; color: #128C7E;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;"><path d="M20.5 3.5A11 11 0 0 0 3.1 17.8L2 22l4.4-1.1a11 11 0 0 0 14.1-17.4z"/></svg>
+                                Request via WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: RESET REQUESTS (ADMIN) -->
+        <div id="reset-requests" class="showcase-section admin-only">
+            <div class="page-header">
+                <h1>Password Reset Requests</h1>
+                <p>Admin approval fallback workflow.</p>
+            </div>
+
+            <!-- FLASH MESSAGE: TEMP PASSWORD -->
+            <div class="flash-temp-password">
+                <div class="eyebrow">Temporary Password — Share this with the user</div>
+                <h3 style="margin: 4px 0 12px; font-size: 1.1rem;">John Doe &middot; john.doe@student.wisdom</h3>
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <code class="temp-code-box" id="tempPwDisplay">K7mP9xQ2vN4w</code>
+                    <button class="copy-btn" onclick="copyToClipboard('tempPwDisplay', this)">Copy</button>
+                </div>
+                <p style="margin-top: 12px; font-size: 0.85rem; color: var(--ink-500);">
+                    This password is shown only once. The user is forced to change it on next login.
+                    <em>(Generated via cryptographically secure Fisher-Yates shuffle)</em>.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Requested</th>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Note</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2026-09-30 10:15</td>
+                                <td><strong>Jane Smith</strong></td>
+                                <td>jane.s@student.wisdom</td>
+                                <td>Lost access to email account.</td>
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-gold btn-sm" onclick="alert('Approve: Generates temp password, sets force_reset=1, sends email/log')">Approve</button>
+                                        <button class="btn btn-danger btn-sm" onclick="alert('Reject: Request marked as rejected, user notified.')">Reject</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: USER MANAGEMENT -->
+        <div id="users" class="showcase-section admin-only">
+            <div class="page-header">
+                <h1>User Management</h1>
+                <p>Features: Column sorting, role/programme filtering, pagination, skeleton loading.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <select class="form-input" style="width: auto; padding: 8px 12px;">
+                            <option>All Roles</option>
+                            <option>Student</option>
+                            <option>Admin</option>
+                        </select>
+                        <select class="form-input" style="width: auto; padding: 8px 12px;">
+                            <option>All Programmes</option>
+                            <option>Form 1-4</option>
+                            <option>Form 5-6</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" onclick="toggleSkeletons()">Simulate Network Load</button>
+                </div>
+                <div class="table-wrap">
+                    <table class="table" id="userTable">
+                        <thead>
+                            <tr>
+                                <th onclick="alert('Sort by Name')">Name ↕</th>
+                                <th onclick="alert('Sort by Role')">Role ↕</th>
+                                <th onclick="alert('Sort by Programme')">Programme ↕</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr>
+                                <td><strong>Alex Mwakalinga</strong><br><span style="font-size:0.8rem; color:var(--ink-500)">alex.m@wisdom</span></td>
+                                <td>Student</td>
+                                <td>Form 4</td>
+                                <td><span class="tag tag-approved">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sarah Johnson</strong><br><span style="font-size:0.8rem; color:var(--ink-500)">sarah.j@wisdom</span></td>
+                                <td>Student</td>
+                                <td>Form 6</td>
+                                <td><span class="tag tag-pending">Pending Approval</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-header" style="border-top: 1px solid var(--line); border-bottom: none; justify-content: center;">
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-ghost btn-sm" disabled>Previous</button>
+                        <button class="btn btn-gold btn-sm">1</button>
+                        <button class="btn btn-ghost btn-sm">2</button>
+                        <button class="btn btn-ghost btn-sm">3</button>
+                        <button class="btn btn-ghost btn-sm">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: FINANCIALS -->
+        <div id="payments" class="showcase-section admin-only">
+            <div class="page-header">
+                <h1>Financial Management</h1>
+                <p>Features: Auto-generated references, copy-to-clipboard, 24h auto-delete proof indicator.</p>
+            </div>
+
+            <div class="card">
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Student</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Proof File</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <code id="ref-101" style="font-family: ui-monospace; font-weight: 600;">WIS-2026-8A3F91</code>
+                                        <button class="copy-btn" onclick="copyToClipboard('ref-101', this)">Copy</button>
+                                    </div>
+                                </td>
+                                <td>Alex Mwakalinga</td>
+                                <td style="font-family: var(--font-display); font-weight: 700;">TZS 450,000</td>
+                                <td><span class="tag tag-approved">Approved</span></td>
+                                <td>
+                                    <span class="tag tag-auto-delete">Auto-deletes in 14h</span>
+                                    <button class="btn btn-ghost btn-sm" style="margin-left: 8px; padding: 4px 8px;">View</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: CONTACT & SUPPORT -->
+        <div id="contact" class="showcase-section">
+            <div class="page-header">
+                <h1>Contact & Support</h1>
+                <p>Integrated WhatsApp deep linking and server-validated support request form.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px;">
+                <div class="card" style="background: var(--navy-800); color: var(--cream-50); border: none;">
+                    <div class="card-body">
+                        <h3 style="color: #fff; margin-bottom: 12px;">Reach us directly</h3>
+                        <p style="color: #a9b7c8; font-size: 0.9rem; margin-bottom: 24px;">Our support desk handles account issues, payment queries, and password resets.</p>
+
+                        <div style="margin-bottom: 16px; display: flex; gap: 12px; align-items: center;">
+                            <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 8px; display: grid; place-items: center;">📞</div>
+                            <div>
+                                <div style="font-size: 0.8rem; color: #a9b7c8;">Phone</div>
+                                <div style="font-weight: 600;">+255 673 266 852</div>
+                            </div>
+                        </div>
+
+                        <a href="https://wa.me/255673266852?text=Hello%20WISDOM%20support" target="_blank" class="btn" style="background: #25D366; color: #fff; width: 100%; margin-top: 16px; text-decoration: none;">
+                            Chat on WhatsApp
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><div class="card-title">Send a written request</div></div>
+                    <div class="card-body">
+                        <form onsubmit="event.preventDefault(); alert('Support request created. Audit log updated.');">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-field">
+                                    <label class="form-label">Your Name</label>
+                                    <input type="text" class="form-input" required onblur="validateField(this)">
+                                </div>
+                                <div class="form-field">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-input" required onblur="validateField(this)">
+                                </div>
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label">Subject</label>
+                                <input type="text" class="form-input" required onblur="validateField(this)">
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label">Message</label>
+                                <textarea class="form-input" rows="4" required onblur="validateField(this)"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-gold">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: ERROR PAGES PREVIEW -->
+        <div id="errors" class="showcase-section">
+            <div class="page-header">
+                <h1>Branded Error Pages</h1>
+                <p>Uses absolute base URLs for assets, ensuring CSS/images load correctly even from deep nested 404 routes.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+                <!-- 404 Preview -->
+                <div class="card" style="text-align: center; padding: 40px 20px;">
+                    <div style="width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 50%; background: var(--cream-50); padding: 6px; box-shadow: 0 0 0 2px var(--gold-600), 0 0 0 7px var(--cream-50), 0 0 0 8px var(--line); display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; color: var(--navy-800);">W</div>
+                    <div style="font-family: var(--font-display); font-size: 3.5rem; font-weight: 700; color: var(--navy-800); line-height: 1;">404</div>
+                    <div style="height: 2px; background: linear-gradient(90deg, var(--gold-600) 0 30%, transparent 30%); margin: 20px auto; max-width: 100px;"></div>
+                    <h2 style="font-size: 1.2rem; color: var(--navy-800); margin-bottom: 8px;">Page not found</h2>
+                    <p style="color: var(--ink-500); font-size: 0.9rem; margin-bottom: 20px;">The page you are looking for does not exist or has moved.</p>
+                    <a href="#" class="btn btn-gold btn-sm" onclick="showSection('dashboard')">Return home</a>
+                </div>
+
+                <!-- 403 Preview -->
+                <div class="card" style="text-align: center; padding: 40px 20px;">
+                    <div style="width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 50%; background: var(--error-bg); padding: 6px; box-shadow: 0 0 0 2px var(--error), 0 0 0 7px var(--error-bg), 0 0 0 8px var(--line); display: grid; place-items: center; font-size: 2rem;">🔒</div>
+                    <div style="font-family: var(--font-display); font-size: 3.5rem; font-weight: 700; color: var(--navy-800); line-height: 1;">403</div>
+                    <div style="height: 2px; background: linear-gradient(90deg, var(--error) 0 30%, transparent 30%); margin: 20px auto; max-width: 100px;"></div>
+                    <h2 style="font-size: 1.2rem; color: var(--navy-800); margin-bottom: 8px;">Access denied</h2>
+                    <p style="color: var(--ink-500); font-size: 0.9rem; margin-bottom: 20px;">You do not have permission to view this resource.</p>
+                    <a href="#" class="btn btn-ghost btn-sm" onclick="showSection('dashboard')">Return home</a>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- SESSION WARNING MODAL -->
+    <div class="modal-overlay" id="sessionModal">
+        <div class="modal-box">
+            <div style="font-size: 2.5rem; margin-bottom: 12px;">⏱️</div>
+            <div class="modal-title">Still there?</div>
+            <div class="modal-body">Your session is about to expire for security reasons. Click below to stay signed in.</div>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn btn-ghost" onclick="closeSessionModal()">Log out</button>
+                <button class="btn btn-gold" onclick="closeSessionModal()">Stay signed in</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ---------------------------------------------------------
+        // INTERACTIVE SHOWCASE LOGIC
+        // ---------------------------------------------------------
+
+        // 1. Navigation & Role Switching
+        function showSection(id) {
+            document.querySelectorAll('.showcase-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function toggleRole() {
+            const role = document.getElementById('roleSelect').value;
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
+                el.style.display = role === 'admin' ? 'block' : 'none';
+            });
+            // Reset to dashboard when switching to student to avoid hidden active states
+            if(role === 'student') showSection('dashboard');
+        }
+
+        // 2. Inline Form Validation (Blur + Submit pattern)
+        function validateField(input) {
+            if (input.checkValidity()) {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+            } else {
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+            }
+        }
+
+        function validateMatch(input) {
+            const pw = document.getElementById('newPw').value;
+            if (input.value === pw && input.value !== '') {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+            } else {
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+            }
+        }
+
+        // 3. Universal Copy-to-Clipboard
+        function copyToClipboard(elementId, btn) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // 4. Skeleton Loading Simulation
+        function toggleSkeletons() {
+            const tbody = document.getElementById('userTableBody');
+            const originalContent = tbody.innerHTML;
+
+            // Replace with skeleton rows
+            tbody.innerHTML = `
+                <tr><td class="skeleton" style="height: 40px;"></td><td class="skeleton" style="height: 40px;"></td><td class="skeleton" style="height: 40px;"></td><td class="skeleton" style="height: 40px;"></td></tr>
+                <tr><td class="skeleton" style="height: 40px;"></td><td class="skeleton" style="height: 40px;"></td><td class="skeleton" style="height: 40px;"></td><td class="skeleton" style="height: 40px;"></td></tr>
+            `;
+
+            setTimeout(() => {
+                tbody.innerHTML = originalContent;
+            }, 1500);
+        }
+
+        // 5. Session Warning Modal
+        function triggerSessionModal() {
+            document.getElementById('sessionModal').classList.add('active');
+        }
+
+        function closeSessionModal() {
+            document.getElementById('sessionModal').classList.remove('active');
+        }
+
+        // Initialize
+        toggleRole();
+    </script>
+</body>
+</html>
